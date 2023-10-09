@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+
+  postgres:
+    container_name: postgres_keycloak
+    image: postgres:13.4
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - net
+    volumes:
+      - /var/opt/data/db:/var/lib/postgresql/data
+    ports:
+      - '5433:5432'
+
+  keycloak:
+    container_name: keycloak
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    ports:
+      - '8080:8080'
+    entrypoint: /opt/keycloak/bin/kc.sh start-dev
+    volumes:
+      - .local/keycloak/:/opt/jboss/keycloak/standalone/data/
+    networks:
+      - net
+
+networks:
+  net:
+    name: net
+    driver: bridge
