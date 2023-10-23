@@ -1,7 +1,10 @@
-package org.example;
+package org.example.authenticator;
 
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.Constants;
+import org.example.rest.SmsSender;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
@@ -12,8 +15,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.FormMessage;
 
-import jakarta.ws.rs.core.MultivaluedMap;
-
 @Slf4j
 @RequiredArgsConstructor
 public class SmsAuthenticator implements Authenticator {
@@ -22,9 +23,6 @@ public class SmsAuthenticator implements Authenticator {
     private static final String INVALID_CODE = "Введенный код неверен";
     private static final String CODE_IS_EXPIRED = "Действие кода закончилось";
     private static final String MOBILE_NUMBER_IS_EMPTY = "Номер телефона должен быть заполнен";
-    private static final String INCORRECT_MOBILE_NUMBER = "Номер телефона не соответствует формату";
-    private static final String AUTHORIZE_ERROR = "Возникла ошибка при авторизации пользователя";
-
     private final SmsSender smsSender;
 
     @Override
@@ -66,14 +64,14 @@ public class SmsAuthenticator implements Authenticator {
                 createErrorPage(context, MOBILE_NUMBER_IS_EMPTY, LOGIN_FORM);
             } else {
                 if (!mobileNumber.matches(Constants.PHONE_PATTERN)) {
-                    createErrorPage(context, INCORRECT_MOBILE_NUMBER, LOGIN_FORM);
+                    createErrorPage(context, Constants.INCORRECT_MOBILE_NUMBER, LOGIN_FORM);
                     return;
                 }
                 sendData(context, mobileNumber);
             }
         } catch (Exception exception) {
             log.error("auth error:", exception);
-            createErrorPage(context, AUTHORIZE_ERROR, LOGIN_FORM);
+            createErrorPage(context, Constants.AUTHORIZE_ERROR, LOGIN_FORM);
         }
     }
 
@@ -89,16 +87,23 @@ public class SmsAuthenticator implements Authenticator {
 
     @Override
     public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
+        // not used
     }
 
     @Override
     public void close() {
+        // not used
     }
 
     private void sendData(AuthenticationFlowContext context, String mobileNumber) {
         AuthenticatorConfigModel config = context.getAuthenticatorConfig();
+        String url = config.getConfig().get(Constants.URL);
         String ttl = config.getConfig().get(Constants.CODE_TTL);
-        String code = smsSender.send(config.getConfig(), mobileNumber);
+        int length = Integer.parseInt(config.getConfig().get(Constants.CODE_LENGTH));
+
+        String code = smsSender.send(length, mobileNumber);
+
+        context.getAuthenticationSession().setAuthNote(Constants.URL, url);
         context.getAuthenticationSession().setAuthNote(Constants.CODE, code);
         context.getAuthenticationSession().setAuthNote(Constants.CODE_TTL, ttl);
         context.getAuthenticationSession().setAuthNote(Constants.START_TIME, String.valueOf(System.currentTimeMillis()));
@@ -114,15 +119,11 @@ public class SmsAuthenticator implements Authenticator {
         KeycloakSession session = context.getSession();
         String mobileNumber = context.getAuthenticationSession().getAuthNote(Constants.MOBILE_NUMBER);
         UserModel user = session.users().getUserByUsername(context.getRealm(), mobileNumber);
-
         if (user == null) {
             user = session.users().addUser(context.getRealm(), mobileNumber);
             log.info("user not found: {}, mobileNumber {}", user.getUsername(), mobileNumber);
             user.setEnabled(true);
-        } else {
-            log.info("user found: {}, mobileNumber {}", user.getUsername(), mobileNumber);
         }
-
         context.setUser(user);
         context.getEvent().detail(Details.USERNAME, user.getUsername());
         context.getAuthenticationSession().setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, user.getUsername());

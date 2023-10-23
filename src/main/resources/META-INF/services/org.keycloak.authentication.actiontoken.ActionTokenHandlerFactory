@@ -1,0 +1,2 @@
+org.example.actiontoken.CustomActionTokenHandler
+org.example.actiontoken.CustomVerifyEmailActionTokenHandler

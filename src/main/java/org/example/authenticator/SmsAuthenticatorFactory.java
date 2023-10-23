@@ -1,5 +1,8 @@
-package org.example;
+package org.example.authenticator;
 
+import org.example.Constants;
+import org.example.rest.SmsSender;
+import org.example.rest.SmsSenderImpl;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -58,21 +61,23 @@ public class SmsAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        RestClient restClient = new RestClientImpl();
-        SmsSender smsSender = new SmsSenderImpl(restClient);
+        SmsSender smsSender = new SmsSenderImpl();
         return new SmsAuthenticator(smsSender);
     }
 
     @Override
     public void init(Config.Scope config) {
+        // not used
     }
 
     @Override
     public void postInit(KeycloakSessionFactory factory) {
+        // not used
     }
 
     @Override
     public void close() {
+        // not used
     }
 
 }

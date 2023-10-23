@@ -1,7 +1,7 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout displayMessage=!messagesPerField.existsError('username','password') displayInfo=realm.password && realm.registrationAllowed && !registrationDisabled??; section>
     <#if section = "header">
-        Введите номер телефона
+        Введите адрес эл. почты
     <#elseif section = "form">
         <div id="kc-form">
             <div id="kc-form-wrapper">
@@ -10,7 +10,7 @@
                           method="post">
                         <#if !usernameHidden??>
                             <div class="${properties.kcFormGroupClass!}">
-                                <label for="mobile_number" class="${properties.kcLabelClass!}">Номер телефона</label>
+                                <label for="username" class="${properties.kcLabelClass!}">Электронная почта</label>
 
                                 <input tabindex="1" id="mobile_number" class="${properties.kcInputClass!}"
                                        name="mobile_number" type="text" autofocus autocomplete="off"
@@ -53,38 +53,6 @@
                     </form>
                 </#if>
             </div>
-
         </div>
-    <#elseif section = "info" >
-        <#if realm.password && realm.registrationAllowed && !registrationDisabled?? && client.clientId = "owner">
-            <div id="kc-registration-container">
-                <div id="kc-registration">
-                    <span><a tabindex="6" href="${url.registrationUrl}">Регистрация</a></span>
-                </div>
-            </div>
-        </#if>
-    <#elseif section = "socialProviders" >
-        <#if realm.password && social.providers?? && client.clientId = "owner">
-            <div id="kc-social-providers" class="${properties.kcFormSocialAccountSectionClass!}">
-                <hr/>
-                <h4>Войти через</h4>
-
-                <ul class="${properties.kcFormSocialAccountListClass!} <#if social.providers?size gt 3>${properties.kcFormSocialAccountListGridClass!}</#if>">
-                    <#list social.providers as p>
-                        <a id="social-${p.alias}"
-                           class="${properties.kcFormSocialAccountListButtonClass!} <#if social.providers?size gt 3>${properties.kcFormSocialAccountGridItem!}</#if>"
-                           type="button" href="${p.loginUrl}">
-                            <#if p.iconClasses?has_content>
-                                <i class="${properties.kcCommonLogoIdP!} ${p.iconClasses!}" aria-hidden="true"></i>
-                                <span class="${properties.kcFormSocialAccountNameClass!} kc-social-icon-text">${p.displayName!}</span>
-                            <#else>
-                                <span class="${properties.kcFormSocialAccountNameClass!}">${p.displayName!}</span>
-                            </#if>
-                        </a>
-                    </#list>
-                </ul>
-            </div>
-        </#if>
     </#if>
-
 </@layout.registrationLayout>
