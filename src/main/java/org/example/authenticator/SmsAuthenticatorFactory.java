@@ -1,6 +1,8 @@
 package org.example.authenticator;
 
 import org.example.Constants;
+import org.example.rest.RestClient;
+import org.example.rest.RestClientImpl;
 import org.example.rest.SmsSender;
 import org.example.rest.SmsSenderImpl;
 import org.keycloak.Config;
@@ -53,7 +55,9 @@ public class SmsAuthenticatorFactory implements AuthenticatorFactory {
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return List.of(new ProviderConfigProperty(Constants.URL, "Адрес сервиса", "", ProviderConfigProperty.STRING_TYPE, "http://localhost:8081"),
+        return List.of(
+                new ProviderConfigProperty(Constants.BASE_URL_SERVICE_1, "Адрес сервиса 1", "", ProviderConfigProperty.STRING_TYPE, "http://localhost:8081"),
+                new ProviderConfigProperty(Constants.BASE_URL_SERVICE_2, "Адрес сервиса 2", "", ProviderConfigProperty.STRING_TYPE, "http://localhost:8081"),
                 new ProviderConfigProperty(Constants.CODE_LENGTH, "Длина сгенерированного кода", "", ProviderConfigProperty.STRING_TYPE, 6),
                 new ProviderConfigProperty(Constants.CODE_TTL, "Длительность действия кода (мс)", "", ProviderConfigProperty.STRING_TYPE, "20000")
         );
@@ -62,7 +66,8 @@ public class SmsAuthenticatorFactory implements AuthenticatorFactory {
     @Override
     public Authenticator create(KeycloakSession session) {
         SmsSender smsSender = new SmsSenderImpl();
-        return new SmsAuthenticator(smsSender);
+        RestClient restClient = new RestClientImpl();
+        return new SmsAuthenticator(smsSender, restClient);
     }
 
     @Override
@@ -79,5 +84,4 @@ public class SmsAuthenticatorFactory implements AuthenticatorFactory {
     public void close() {
         // not used
     }
-
 }

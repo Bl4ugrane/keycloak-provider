@@ -72,7 +72,7 @@ public class VerifyEmailProvider implements RealmResourceProvider {
         } catch (UserAlreadyExistsException exception) {
             return Response.status(Status.CONFLICT).entity(Map.of("message", exception.getMessage())).build();
         } catch (Exception exception) {
-            return Response.serverError().build();
+            return Response.serverError().entity(Map.of("message", exception.getMessage())).build();
         }
         return Response.ok(Map.of("message", Response.Status.OK.getReasonPhrase())).build();
     }

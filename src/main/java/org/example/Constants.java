@@ -30,7 +30,8 @@ public class Constants {
     /**
      * Other variables
      */
-    public String URL = "url";
+    public String BASE_URL_SERVICE_1 = "baseUrlService1";
+    public String BASE_URL_SERVICE_2 = "baseUrlService2";
     public String ERROR = "error";
 
     /**

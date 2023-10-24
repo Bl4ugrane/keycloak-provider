@@ -4,6 +4,8 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Constants;
+import org.example.rest.RequestDto;
+import org.example.rest.RestClient;
 import org.example.rest.SmsSender;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -18,12 +20,14 @@ import org.keycloak.models.utils.FormMessage;
 @Slf4j
 @RequiredArgsConstructor
 public class SmsAuthenticator implements Authenticator {
-    private static final String LOGIN_FORM = "login.ftl";
+    private static final String LOGIN_FORM = "custom-login.ftl";
     private static final String VALIDATE_CODE_FORM = "validate-code.ftl";
     private static final String INVALID_CODE = "Введенный код неверен";
     private static final String CODE_IS_EXPIRED = "Действие кода закончилось";
     private static final String MOBILE_NUMBER_IS_EMPTY = "Номер телефона должен быть заполнен";
+
     private final SmsSender smsSender;
+    private final RestClient restClient;
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
@@ -97,13 +101,13 @@ public class SmsAuthenticator implements Authenticator {
 
     private void sendData(AuthenticationFlowContext context, String mobileNumber) {
         AuthenticatorConfigModel config = context.getAuthenticatorConfig();
-        String url = config.getConfig().get(Constants.URL);
+        String url = config.getConfig().get(Constants.BASE_URL_SERVICE_1);
         String ttl = config.getConfig().get(Constants.CODE_TTL);
         int length = Integer.parseInt(config.getConfig().get(Constants.CODE_LENGTH));
 
         String code = smsSender.send(length, mobileNumber);
+        restClient.send(url, new RequestDto(mobileNumber, code));
 
-        context.getAuthenticationSession().setAuthNote(Constants.URL, url);
         context.getAuthenticationSession().setAuthNote(Constants.CODE, code);
         context.getAuthenticationSession().setAuthNote(Constants.CODE_TTL, ttl);
         context.getAuthenticationSession().setAuthNote(Constants.START_TIME, String.valueOf(System.currentTimeMillis()));
@@ -133,5 +137,4 @@ public class SmsAuthenticator implements Authenticator {
     private void createErrorPage(AuthenticationFlowContext context, String errorMessage, String page) {
         context.challenge(context.form().addError(new FormMessage(Constants.ERROR, errorMessage)).createForm(page));
     }
-
 }
