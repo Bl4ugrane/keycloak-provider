@@ -22,6 +22,7 @@ import java.util.UUID;
 
 @Slf4j
 public class UpdateOrganization implements RequiredActionProvider, RequiredActionFactory {
+    private static final String OWNER = "owner";
     private static final String ADMIN = "admin";
     private static final String UPDATE_ORGANIZATION_FORM = "update-organization.ftl";
 
@@ -29,9 +30,10 @@ public class UpdateOrganization implements RequiredActionProvider, RequiredActio
 
     @Override
     public void evaluateTriggers(RequiredActionContext context) {
+        String clientId = context.getAuthenticationSession().getClient().getClientId();
         UserModel user = context.getUser();
         boolean isAdmin = user.getRoleMappingsStream().anyMatch(roleModel -> ADMIN.equalsIgnoreCase(roleModel.getName()));
-        if (isAdmin && !user.getAttributes().containsKey(Constants.ORGANIZATION_ID)) {
+        if (OWNER.equalsIgnoreCase(clientId) && isAdmin && !user.getAttributes().containsKey(Constants.ORGANIZATION_ID)) {
             context.getUser().addRequiredAction(Constants.UPDATE_ORGANIZATION);
             log.info("User {} is required to update organization", user.getUsername());
         }
