@@ -43,5 +43,5 @@ public class Constants {
      * Errors
      */
     public String INCORRECT_MOBILE_NUMBER = "Номер телефона не соответствует формату";
-    public String AUTHORIZE_ERROR = "Возникла ошибка при авторизации пользователя";
+    public String AUTHORIZE_ERROR = "Возникла ошибка при авторизации пользователя. Попробуйте позже";
 }

@@ -70,6 +70,7 @@ public class UpdateOrganization implements RequiredActionProvider, RequiredActio
             restClient.send(url, request);
             context.success();
         } catch (InvalidInnException exception) {
+            log.error("auth error:", exception);
             createErrorPage(context, exception.getMessage());
         } catch (Exception exception) {
             log.error("auth error:", exception);

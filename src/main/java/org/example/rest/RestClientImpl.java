@@ -1,11 +1,10 @@
 package org.example.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -23,6 +22,7 @@ public class RestClientImpl implements RestClient {
     }
 
     @Override
+    @SneakyThrows
     public void send(String url, RequestDto requestDto) {
         try {
             String requestBody = mapper.writeValueAsString(requestDto);
@@ -32,10 +32,9 @@ public class RestClientImpl implements RestClient {
                     .build();
             log.info("send request to url -- {}, body -- {}", url, requestDto);
             httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-        } catch (JsonProcessingException exception) {
-            log.error("couldn't map to json request -- {}", requestDto, exception);
         } catch (Exception exception) {
             log.error("couldn't send request to url -- {}", url, exception);
+            throw exception;
         }
     }
 }

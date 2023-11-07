@@ -55,7 +55,6 @@ public class SmsAuthenticator implements Authenticator {
                         createErrorPage(context, CODE_IS_EXPIRED, LOGIN_FORM);
                         return;
                     }
-
                     getOrCreateUser(context);
                     return;
                 } else {
