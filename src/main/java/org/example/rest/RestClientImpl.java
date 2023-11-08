@@ -31,7 +31,8 @@ public class RestClientImpl implements RestClient {
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
             log.info("send request to url -- {}, body -- {}", url, requestDto);
-            httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            log.info("receive response from url -- {}, code -- {} body -- '{}'", url, response.statusCode(), response.body());
         } catch (Exception exception) {
             log.error("couldn't send request to url -- {}", url, exception);
             throw exception;
